@@ -1,4 +1,4 @@
-const backend = require('index');
+const backend = require('./index');
 
 // Создаём экземпляр класса backend.Main
 var server = new backend.Main(
@@ -37,7 +37,7 @@ server.paramsError = (required, additional) => ({ required, additional });
 
 // Создаём класс группы методов
 class ExampleMethodGroup extends backend.Group {
-	handler (params, session) {  // Путевая обработка
+	handler (params, session) {               // Путевая обработка
 		session._setValue('example', 1);  // Задать значение
 		console.log(session.example);     // Получить значение из сессии
 		session._remove('example');       // Убрать значение
@@ -67,7 +67,6 @@ var exampleMethod = new ExampleMethod('/example', {
 		max_length : 255,
 		// allow_methods : ['post'],
 		// allow_params : ['json'],
-		
 	}
 });
 // Привяжем метод к группе
@@ -76,4 +75,4 @@ exampleMethod.group(ExampleMethodGroup);
 server.method(exampleMethod);
 
 // Запускаем сервер
-server.server().listen(8080);
+server.server('/api/v1'/*, { Информация о SSL }*/).listen(8080);
