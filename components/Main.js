@@ -12,6 +12,10 @@ class Main {
 	method (methodObj) {
 		this.methods[methodObj.path] = methodObj;
 	}
+	
+	call (method, params) {
+		return this.methods[method.path].execute(params);
+	}
 
 	router (returnMiddlewareFunction = true, middlewareFunction = (req, res, next) => next()) {
 		let router = express.Router();
