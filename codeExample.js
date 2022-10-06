@@ -34,6 +34,7 @@ server.resposne = (response) => ({
 	code: 200
 });
 server.paramsError = (required, additional) => ({ required, additional });
+server.typeError = 'param {param} must be only {long_type} ({short_type})';
 
 // Создаём класс группы методов
 class ExampleMethodGroup extends backend.Group {

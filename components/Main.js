@@ -14,7 +14,7 @@ class Main {
 	}
 	
 	call (method, params) {
-		return this.methods[method.path].execute(params);
+		return this.methods[method.path].pre_execute(params);
 	}
 
 	router (returnMiddlewareFunction = true, middlewareFunction = (req, res, next) => next()) {
