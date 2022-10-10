@@ -2,7 +2,9 @@ module.exports = {
 	unknown : {
 		long_name  : 'unknown',
 		short_name : 'unk',
-		syntax : (value, needs_convert = true) => throw new Error('Undefined datatype')
+		syntax : (value, needs_convert = true) => {
+			throw new Error('Undefined datatype');
+		}
 	},
 	string : {
 		long_name  : 'string',

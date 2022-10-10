@@ -13,7 +13,7 @@ server.session = (params, sessionData) => {
 	return 'Example error';               // Пример ошибки
 };
 // Настраиваем вывод
-server.error = (error) => ({
+server.errorHandler = (error) => ({
 	mainbody : { error },
 	headers  : {
 		errored : 1
@@ -24,7 +24,7 @@ server.error = (error) => ({
 	// redirect_uri: '';  // if want redirect to another url
 	code: 400
 });
-server.resposne = (response) => ({
+server.resposneHandler = (response) => ({
 	mainbody : { response },
 	headers : {
 		errored: 0	
@@ -39,11 +39,11 @@ server.typeError = 'param {param} must be only {long_type} ({short_type})';
 // Создаём класс группы методов
 class ExampleMethodGroup extends backend.Group {
 	handler (params, session) {               // Путевая обработка
-		session._setValue('example', 1);  // Задать значение
-		console.log(session.example);     // Получить значение из сессии
-		session._remove('example');       // Убрать значение
-		return 1;                         // Успешно
-		return 'Example error'            // Пример ошибки
+		session._setValue('example', 1);      // Задать значение
+		console.log(session.example);         // Получить значение из сессии
+		session._remove('example');           // Убрать значение
+		return 1;                             // Успешно
+		return 'Example error'                // Пример ошибки
 	}
 }
 // Создаём класс метода
@@ -58,7 +58,8 @@ class ExampleMethod extends backend.Method {
 		throw { code: 'EXAMPLE_ERROR', details: new Object() };
 	}
 }
-var exampleMethod = new ExampleMethod('/example', {
+
+var exampleMethod = new ExampleMethod('example', '/example', {
 	text: {
 		required : true,
 		type : backend.types.string,
@@ -76,4 +77,9 @@ exampleMethod.group(ExampleMethodGroup);
 server.method(exampleMethod);
 
 // Запускаем сервер
-server.server('/api/v1'/*, { Информация о SSL }*/).listen(8080);
+server.server('/api/v1'/*, { Информация о SSL }*/).listen(8080, async (err) => {
+	if (err) { throw err; }
+	else {
+		console.log('SERVER RUNNED');
+	}
+});

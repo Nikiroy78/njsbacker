@@ -1,7 +1,27 @@
+const typesApi = require('./types');
+
+
 class Method {
-	constructor (path, params) {
+	constructor (name, path, params) {
+		this.name = name;
 		this.path = path;
 		this.paramsCompiles = params;
+		this.groupsConnected = new Array();
+		this.allowedMethods = new Array();
+		// Setting allow methods
+		let allowedMethods;
+		
+		for (let param in params) {
+			if (!params[param].allow_methods) allowedMethods = ['get', 'post', 'put', 'delete'];
+			else {
+				allowedMethods = params[param].allow_methods;
+			}
+			for (let allowMethod in allowedMethods) {
+				if (this.allowedMethods.indexOf(allowedMethods[allowMethod]) == -1) {
+					this.allowedMethods.push(allowedMethods[allowMethod]);
+				}
+			}
+		}
 	}
 	
 	executeIntoExpressRouter (
@@ -21,7 +41,7 @@ class Method {
 		for (let param in this.paramsCompiles) {
 			paramScheme = {
 				required      : false,
-				type          : require('./types').unknown,
+				type          : typesApi.unknown,
 				allow_methods : ['get', 'post', 'put', 'delete'],
 				allow_params  : ['headers', 'json', 'params', 'query', 'body', 'files', 'cookies']
 			};
@@ -50,12 +70,25 @@ class Method {
 							[isSyntax, convertedValue] = paramScheme.type(query[param], true);
 							break;
 						case 'cookies' :
-							[isSyntax, convertedValue] = paramScheme.type(query[param], true);
+							[isSyntax, convertedValue] = paramScheme.type(cookies[param], true);
+							break;
+						case 'headers' :
+							[isSyntax, convertedValue] = paramScheme.type(headers[param], true);
 							break;
 						case 'json' :
-							[isSyntax, convertedValue] = paramScheme.type(query[param], false);
+							[isSyntax, convertedValue] = paramScheme.type(json[param], false);
+							break;
+						case 'params' :
+							[isSyntax, convertedValue] = paramScheme.type(params[param], false);
+							break;
+						case 'body' :
+							[isSyntax, convertedValue] = paramScheme.type(body[param], false);
+							break;
+						case 'files' :
+							[isSyntax, convertedValue] = paramScheme.type(files[param], false);
 							break;
 					}
+					if (isSyntax) break;
 				}
 				if (isSyntax) {
 					paramsEndless[param] = convertedValue;
@@ -85,7 +118,7 @@ class Method {
 			for (let param in this.paramsCompiles) {
 				paramScheme = {
 					required      : false,
-					type          : require('./types').unknown,
+					type          : typesApi.unknown,
 					allow_methods : ['get', 'post', 'put', 'delete'],
 					allow_params  : ['headers', 'json', 'params', 'query', 'body', 'files', 'cookies']
 				};
@@ -98,8 +131,33 @@ class Method {
 						additional.missed.push(param);
 					}
 				}
+				else {
+					[isSyntax, _] = paramScheme.type(params[param], false);
+					if (!isSyntax) {
+						if (paramScheme.required) {
+							required.unsyntax.push({param : param, description : this.typeError.split('{param}').join(param).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
+						}
+						else {
+							additional.unsyntax.push({param : param, description : this.typeError.split('{param}').join(param).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
+						}
+					}
+				}
+			}
+			
+			if (required.missed.length > 0 || required.unsyntax.length > 0 || additional.unsyntax.length > 0) {
+				throw this.paramsError(required, additional);
+			}
+			else {
+				return this.execute(params);
 			}
 		}
+		else {
+			this.execute(params);
+		}
+	}
+	
+	group (groupClass) {
+		this.groupsConnected.push(groupClass);
 	}
 	
 	execute (params) {}
