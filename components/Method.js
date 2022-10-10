@@ -8,6 +8,8 @@ class Method {
 		this.paramsCompiles = params;
 		this.groupsConnected = new Array();
 		this.allowedMethods = new Array();
+		this.typeError = 'param {param} must be only {long_type} ({short_type})';
+		this.valuesError = 'value (({value})) not finded into {values}';
 		// Setting allow methods
 		let allowedMethods;
 		
@@ -22,6 +24,10 @@ class Method {
 				}
 			}
 		}
+	}
+	
+	_pinMain (mainObject) {
+		this.MainObject = mainObject;
 	}
 	
 	executeIntoExpressRouter (
@@ -65,30 +71,33 @@ class Method {
 				let isSyntax;
 				let convertedValue;
 				for (let key in checkKeys) {
-					switch (key) {
+					switch (checkKeys[key]) {
 						case 'query' :
-							[isSyntax, convertedValue] = paramScheme.type(query[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(query[param], true);
 							break;
 						case 'cookies' :
-							[isSyntax, convertedValue] = paramScheme.type(cookies[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(cookies[param], true);
 							break;
 						case 'headers' :
-							[isSyntax, convertedValue] = paramScheme.type(headers[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(headers[param], true);
 							break;
 						case 'json' :
-							[isSyntax, convertedValue] = paramScheme.type(json[param], false);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(json[param], false);
 							break;
 						case 'params' :
-							[isSyntax, convertedValue] = paramScheme.type(params[param], false);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(params[param], false);
 							break;
 						case 'body' :
-							[isSyntax, convertedValue] = paramScheme.type(body[param], false);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(body[param], false);
 							break;
 						case 'files' :
-							[isSyntax, convertedValue] = paramScheme.type(files[param], false);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(files[param], false);
 							break;
 					}
-					if (isSyntax) break;
+					if (isSyntax) {
+						isSyntax = paramScheme.type.checkSchema(convertedValue, paramScheme);
+						if (isSyntax) break;
+					}
 				}
 				if (isSyntax) {
 					paramsEndless[param] = convertedValue;
@@ -100,7 +109,7 @@ class Method {
 			}
 		}
 		if (required.missed.length > 0 || required.unsyntax.length > 0 || additional.unsyntax.length > 0) {
-			throw this.paramsError(required, additional);
+			throw this.MainObject.paramsError(required, additional);
 		}
 		else {
 			return this.pre_execute(paramsEndless, false);
@@ -141,18 +150,36 @@ class Method {
 							additional.unsyntax.push({param : param, description : this.typeError.split('{param}').join(param).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
 						}
 					}
+					else {
+						if (paramScheme.values != undefined) {
+							if (paramScheme.values.indexOf(params[param]) == -1) {
+								if (paramScheme.required) {
+									required.unsyntax.push({
+										param       : param,
+										description : this.valuesError.split('{value}').join(convertedValue.toString()).split('{values}').join(paramScheme.values.join(', '))
+									});
+								}
+								else {
+									additional.unsyntax.push({
+										param       : param,
+										description : this.valuesError.split('{value}').join(convertedValue.toString()).split('{values}').join(paramScheme.values.join(', '))
+									});
+								}
+							}
+						}
+					}
 				}
 			}
 			
 			if (required.missed.length > 0 || required.unsyntax.length > 0 || additional.unsyntax.length > 0) {
-				throw this.paramsError(required, additional);
+				throw this.MainObject.paramsError(required, additional);
 			}
 			else {
 				return this.execute(params);
 			}
 		}
 		else {
-			this.execute(params);
+			return this.execute(params);
 		}
 	}
 	

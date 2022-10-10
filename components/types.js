@@ -7,17 +7,24 @@ module.exports = {
 		}
 	},
 	string : {
-		long_name  : 'string',
-		short_name : 'str', 
-		syntax : (value, needs_convert = false) => {
+		long_name   : 'string',
+		short_name  : 'str',
+		checkSchema : (value, schema) => {
+			if (schema.values != undefined) {
+				if (schema.values.indexOf(value) == -1) {
+					return [false, 'valuesError'];
+				}
+			}
+		},
+		syntax      : (value, needs_convert = false) => {
 			if (typeof(value) == 'string') {
-				return true, value;
+				return [true, value];
 			}
 			else if (needs_convert) {
-				return true, needs_convert.toString()
+				return [true, value.toString()];
 			}
 			else {
-				return false, undefined;
+				return [false, undefined];
 			}
 		}
 	}
