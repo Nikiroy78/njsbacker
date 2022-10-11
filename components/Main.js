@@ -17,43 +17,44 @@ class Main {
 	constructor (sendHeaders = true) {
 		this.sendHeaders = sendHeaders;
 		this.methods = new Object();
-		
-		this.errorHadler = (error) => {
-			let errorData;
-			if (error.name == "API Error") {
-				errorData = {
-					code    : error.message,
-					details : error.data
-				};
-			}
-			else {
-				errorData = {
-					name  : error.name,
-					stack : error.stack
-				};
-			}
-			return {
-				mainbody : { error : errorData },
-				headers  : {},
-				cookies  : {},
-				// redirect_uri: '';  // if want redirect to another url
-				code: 400
-			}
-		};
-		
-		this.responseHandler = (response) => ({
-			mainbody : { response },
-			headers : {},
-			cookies : {},
-			// redirect_uri: '';  // if want redirect to another url
-			code: 200
-		});
-		
-		this.paramsError = (required, additional) => {
-			return new ApiError('UNSYNTAX_OR_MISSED_REQUIRED_PARAMS', { required, additional });
-		};
-		this.typeError = 'param {param} must be only {long_type} ({short_type})';
 	}
+	
+	paramsError (required, additional) {
+		return new ApiError('UNSYNTAX_OR_MISSED_REQUIRED_PARAMS', { required, additional });
+	}
+	
+	errorHadler (error) {
+		let errorData;
+		if (error.name == "API Error") {
+			errorData = {
+				code    : error.message,
+				details : error.data
+			};
+		}
+		else {
+			errorData = {
+				name  : error.name,
+				stack : error.stack
+			};
+		}
+		return {
+			mainbody : { error : errorData },
+			headers  : {},
+			cookies  : {},
+			// redirect_uri: '';  // if want redirect to another url
+			code: 400
+		}
+	}
+	
+	session (params, sessionData) { return 1; }
+	
+	responseHandler (result) { return ({
+		mainbody : { result },
+		headers : {},
+		cookies : {},
+		// redirect_uri: '';  // if want redirect to another url
+		code: 200
+	}) };
 	
 	method (methodObj) {
 		methodObj._pinMain(this);
@@ -61,10 +62,10 @@ class Main {
 	}
 	
 	call (method, params) {
-		return this.methods[method.name].pre_execute(params);
+		return this.methods[method].pre_execute(params);
 	}
 
-	router (returnMiddlewareFunction = false, middlewareFunction = (req, res, next) => next(), debug = (text) => {}) {
+	router (returnMiddlewareFunction = false, middlewareFunction = (req, res, next) => next(), debug = (text) => console.log(text)) {
 		let router = express.Router();
 		router.use(require('cookie-parser')());
 		// parse various different custom JSON types as JSON
@@ -84,7 +85,7 @@ class Main {
 					}
 					try {
 						let contentType = req.get('Content-Type');
-						if (!!contentType) {
+						if (contentType != undefined) {
 							contentType = contentType.toLowerCase();
 						}
 						else {
@@ -92,6 +93,7 @@ class Main {
 						}
 						
 						let result = this.methods[name].executeIntoExpressRouter(
+							this.methods[name].allowedMethods[methodId],
 							req.headers,
 							(contentType.indexOf('json') != -1) ? req.body : new Object(),
 							req.params,
@@ -105,6 +107,7 @@ class Main {
 						);
 						if (!handledDataResponse.redirect_uri) {
 							for (let header in handledDataResponse.headers) {
+								console.log('>>header', header);
 								res.set(header, handledDataResponse.headers[header].toString());
 							}
 							for (let cookie in handledDataResponse.cookies) {
