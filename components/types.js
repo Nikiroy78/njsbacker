@@ -1,4 +1,4 @@
-module.exports = {
+const types = {
 	dynamic : {
 		long_name   : 'dynamic',
 		short_name  : 'dyn',
@@ -62,6 +62,37 @@ module.exports = {
 			}
 		}
 	},
+	file : (allowed_types=null) => ({
+		long_name   : 'file',
+		short_name  : 'file',
+		checkSchema : (value, schema) => {
+			if (schema.min_length != undefined) {  // min_length
+				if (value.size < schema.min_length) {
+					return [false, 'minLengthError'];
+				}
+			}
+			
+			if (schema.max_length != undefined) {  // max_length
+				if (value.size > schema.max_length) {
+					return [false, 'maxLengthError'];
+				}
+			}
+			
+			if (allowed_types != null) {
+				let file_extension = value.name.split(".")[value.name.split(".").length - 1];
+				if (allowed_types.indexOf(file_extension.toLowerCase()) == -1) {
+					return [false, 'unAllowExtension'];
+				}
+			}
+			
+			return [true, 'ok'];
+		},
+		syntax : (value, needs_convert = false) => {
+			if (typeof(value) != 'object') {
+				return [false, undefined];
+			}
+		}
+	}),
 	string : {
 		long_name   : 'string',
 		short_name  : 'str',
@@ -98,4 +129,7 @@ module.exports = {
 			}
 		}
 	}
-}
+};
+
+
+module.exports = types;

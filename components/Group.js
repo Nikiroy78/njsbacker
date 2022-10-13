@@ -1,4 +1,8 @@
-class Group {}
+class Group {
+	constructor () {
+		
+	}
+}
 
 
 module.exports = Group;

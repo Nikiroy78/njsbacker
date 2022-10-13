@@ -2,11 +2,11 @@ const backend = require('./index');
 
 // Создаём класс бэкенда, наследующий класс backend.Main
 class Main extends backend.Main {
-	session (params, sessionData) {	          // Настраиваем сессию (опционально)
+	session (params, sessionData, next) {	  // Настраиваем сессию (опционально)
 		sessionData._setValue('example', 1);  // Задать значение
 		console.log(sessionData.example);     // Получить значение из сессии
 		sessionData._remove('example');       // Убрать значение
-		return 1;                             // Успешно
+		return next();                        // Успешно
 		return 'Example error';               // Пример ошибки
 	};
 	
@@ -21,6 +21,14 @@ class Main extends backend.Main {
 		// redirect_uri: '';  // if want redirect to another url
 		code: 400
 	}};*/
+	
+	session (params, sessionData) {
+		sessionData._setValue('example', 1);  // Задать значение
+		console.log(sessionData.example);     // Получить значение из сессии
+		sessionData._remove('example');       // Убрать значение
+		return 1;                             // Успешно
+		return 'Example error'                // Пример ошибки
+	}
 	
 	responseHandler (response) { return ({
 		mainbody : { response },
@@ -38,11 +46,20 @@ class Main extends backend.Main {
 var server = new Main(
 	false  // Отобразить в заголовках информацию о текущем фреймворке
 );
+server.setSessionParams(  // Зададим необходимые параметры для сессии
+	{
+		session_id : {
+			required : true,
+			type : backend.types.integer,
+			values : [1]
+		}
+	}
+);
 server.typeError = 'param {param} must be only {long_type} ({short_type})';
 
 // Создаём класс группы методов
 class ExampleMethodGroup extends backend.Group {
-	handler (params, session) {         	  // Путевая обработка
+	handler (params, session) {	              // Путевая обработка
 		session._setValue('example', 1);      // Задать значение
 		console.log(session.example);         // Получить значение из сессии
 		session._remove('example');           // Убрать значение
@@ -62,7 +79,8 @@ class ExampleMethod extends backend.Method {
 			text   : params.text,
 			result : this.MainObject.call('sum', {
 				a : 15,
-				b : 17
+				b : 17,
+				session_id : params.session_id
 			})
 		};
 		throw new backend.ApiError('EXAMPLE_ERROR', new Object());

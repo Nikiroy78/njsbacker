@@ -17,6 +17,13 @@ class Main {
 	constructor (sendHeaders = true) {
 		this.sendHeaders = sendHeaders;
 		this.methods = new Object();
+		this.sessionData = new Object();
+		
+		this.fileUploadConfig = {
+			limits: { fileSize : 1024 * 1024 * 256 },  // 256 Mb maximum
+			abortOnLimit: true,
+			responseOnLimit: '{"error":"FILE_SIZE_LIMIT_HAS_BEEN_REACHED"}'
+		};
 	}
 	
 	paramsError (required, additional) {
@@ -46,6 +53,10 @@ class Main {
 		}
 	}
 	
+	setSessionParams (sessionParams) {
+		this.sessionData = sessionParams;
+	}
+	
 	session (params, sessionData) { return 1; }
 	
 	responseHandler (result) { return ({
@@ -64,6 +75,10 @@ class Main {
 	call (method, params) {
 		return this.methods[method].pre_execute(params);
 	}
+	
+	fileSetting (fileUploadConfig) {
+		this.fileUploadConfig = fileUploadConfig;
+	}
 
 	router (returnMiddlewareFunction = false, middlewareFunction = (req, res, next) => next(), debug = (text) => console.log(text)) {
 		let router = express.Router();
@@ -73,7 +88,9 @@ class Main {
 		// parse some custom thing into a Buffer
 		router.use(bodyParser.raw({ type: 'application/vnd.custom-type' }))
 		// parse an HTML body into a string
-		router.use(bodyParser.text({ type: 'text/html' }))
+		router.use(bodyParser.text({ type: 'text/html' }));
+		// parse files 
+		app.use(require('express-fileupload')(this.fileUploadConfig));
 		
 		for (let name in this.methods) {
 			debug(`CONNECT METHOD : ${name}`);

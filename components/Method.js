@@ -78,26 +78,14 @@ class Method {
 		files,
 		cookies
 	) {
-		// Execute session
-		let sessionObject = new Session();
-		this.MainObject.session(compileParams({
-			headers,
-			json,
-			params,
-			query,
-			body,
-			files,
-			cookies
-		}), sessionObject);
-		let values = sessionObject._getValues();
-		for (let key in values) { paramsEndless[key] = values[key]; }
-		
 		let paramsEndless = new Object();
 		let paramScheme;
 		let required   = { missed : [], unsyntax : [] };
 		let additional = { missed : [], unsyntax : [] };
 		let checkKeys;
-		for (let param in this.paramsCompiles) {
+		let paramsCompiles = Object.assign({}, this.paramsCompiles, this.MainObject.sessionData);
+		
+		for (let param in paramsCompiles) {
 			checkKeys = new Array();
 			paramScheme = {
 				required      : false,
@@ -107,7 +95,7 @@ class Method {
 				allow_params  : ['headers', 'json', 'params', 'query', 'body', 'files', 'cookies']
 			};
 			// Configure paramScheme
-			for (let key in this.paramsCompiles[param]) { paramScheme[key] = this.paramsCompiles[param][key]; }
+			for (let key in paramsCompiles[param]) { paramScheme[key] = paramsCompiles[param][key]; }
 			// check missible
 			if (headers[param] != undefined & paramScheme.allow_params.indexOf('headers') != -1) { checkKeys.push('headers'); }
 			if (json[param] != undefined & paramScheme.allow_params.indexOf('json') != -1) { checkKeys.push('json'); }
@@ -183,8 +171,9 @@ class Method {
 			let isSyntax;
 			let value;
 			let paramScheme;
+			let paramsCompiles = Object.assign(this.paramsCompiles, this.MainObject.sessionData);
 			
-			for (let param in this.paramsCompiles) {
+			for (let param in paramsCompiles) {
 				paramScheme = {
 					required      : false,
 					type          : this.isDynamic ? typesApi.dynamic : typesApi.unknown,
@@ -192,7 +181,7 @@ class Method {
 					conversion    : false,
 					allow_params  : ['headers', 'json', 'params', 'query', 'body', 'files', 'cookies']
 				};
-				for (let key in this.paramsCompiles[param]) { paramScheme[key] = this.paramsCompiles[param][key]; }
+				for (let key in paramsCompiles[param]) { paramScheme[key] = paramsCompiles[param][key]; }
 				if (params[param] === undefined) {
 					if (paramScheme.required) {
 						required.missed.push(param);
@@ -233,6 +222,12 @@ class Method {
 				throw this.MainObject.paramsError(required, additional);
 			}
 		}
+		// Исполнение сессии
+		let sessionData = new Session();
+		this.MainObject.session(params, sessionData);
+		sessionData = sessionData._getValues();
+		for (let key in sessionData) { params[key] = sessionData[key]; }
+		// Исполнение группы
 		
 		return this.execute(params);
 	}
