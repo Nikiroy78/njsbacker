@@ -1,6 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser')
-const https = require('https');
+const bodyParser = require('body-parser');
 const version = '1.0.0';
 
 
@@ -90,7 +89,7 @@ class Main {
 		// parse an HTML body into a string
 		router.use(bodyParser.text({ type: 'text/html' }));
 		// parse files 
-		app.use(require('express-fileupload')(this.fileUploadConfig));
+		router.use(require('express-fileupload')(this.fileUploadConfig));
 		
 		for (let name in this.methods) {
 			debug(`CONNECT METHOD : ${name}`);
@@ -124,7 +123,6 @@ class Main {
 						);
 						if (!handledDataResponse.redirect_uri) {
 							for (let header in handledDataResponse.headers) {
-								console.log('>>header', header);
 								res.set(header, handledDataResponse.headers[header].toString());
 							}
 							for (let cookie in handledDataResponse.cookies) {
@@ -165,7 +163,7 @@ class Main {
 		}
 	}
 	
-	server (mountPath = '/', sslOptions = null) {
+	server (mountPath = '/') {
 		let app = express();
 		
 		app.use(mountPath, this.router(true));

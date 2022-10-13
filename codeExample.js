@@ -2,12 +2,12 @@ const backend = require('./index');
 
 // Создаём класс бэкенда, наследующий класс backend.Main
 class Main extends backend.Main {
-	session (params, sessionData, next) {	  // Настраиваем сессию (опционально)
+	session (params, sessionData) {	  // Настраиваем сессию (опционально)
 		sessionData._setValue('example', 1);  // Задать значение
 		console.log(sessionData.example);     // Получить значение из сессии
 		sessionData._remove('example');       // Убрать значение
-		return next();                        // Успешно
-		return 'Example error';               // Пример ошибки
+		return 1;                             // Успешно
+		throw 'Example error';                // Пример ошибки
 	};
 	
 	/* errorHandler (error) { return {
@@ -64,7 +64,7 @@ class ExampleMethodGroup extends backend.Group {
 		console.log(session.example);         // Получить значение из сессии
 		session._remove('example');           // Убрать значение
 		return 1;                             // Успешно
-		return 'Example error'                // Пример ошибки
+		throw 'Example error'                 // Пример ошибки
 	}
 }
 // Создаём классы методов
@@ -74,12 +74,12 @@ class ExampleMethod extends backend.Method {
 	*/
 	
 	// Обработчик параметров
-	execute (params) {
+	execute (params, session, groups) {
 		return {
 			text   : params.text,
 			result : this.MainObject.call('sum', {
-				a : 15,
-				b : 17,
+				a  : 15,
+				b  : 17,
 				session_id : params.session_id
 			})
 		};
@@ -89,7 +89,7 @@ class ExampleMethod extends backend.Method {
 
 
 class SumMethod extends backend.Method {
-	execute (params) {
+	execute (params, session, groups) {
 		return params.a + params.b;
 	}
 }
@@ -111,7 +111,7 @@ var sumMethod = new SumMethod('sum', '/sum', {
 });
 
 var exampleMethod = new ExampleMethod('example', '/example', {
-	text: {
+	text : {
 		required : true,
 		type : backend.types.string,
 		conversion : false,
@@ -123,14 +123,22 @@ var exampleMethod = new ExampleMethod('example', '/example', {
 	}
 });
 // Привяжем метод к группе
-exampleMethod.group(ExampleMethodGroup);
-sumMethod.group(ExampleMethodGroup);
+exampleMethod.group(new ExampleMethodGroup({
+	ses : {
+		type : backend.types.string
+	}
+}));
+sumMethod.group(new ExampleMethodGroup({
+	ses : {
+		type : backend.types.string
+	}
+}));
 // Привяжем метод к основному проекту
 server.method(exampleMethod);
 server.method(sumMethod);
 
 // Запускаем сервер
-server.server('/api/v1'/*, { Информация о SSL }*/).listen(8080, async (err) => {
+server.server('/api/v1').listen(8080, async (err) => {
 	if (err) { throw err; }
 	else {
 		console.log('SERVER RUNNED');

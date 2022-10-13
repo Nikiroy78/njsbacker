@@ -91,6 +91,17 @@ const types = {
 			if (typeof(value) != 'object') {
 				return [false, undefined];
 			}
+			else {
+				let syntaxed = value.name != undefined &
+				               value.mv != undefined &
+				               value.mimetype != undefined &
+				               value.data != undefined &
+				               value.tempFilePath != undefined &
+				               value.truncated != undefined &
+				               value.size != undefined &
+				               value.md5 != undefined;
+				return [syntaxed, syntaxed ? value : undefined];
+			}
 		}
 	}),
 	string : {

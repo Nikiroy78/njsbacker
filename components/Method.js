@@ -84,6 +84,9 @@ class Method {
 		let additional = { missed : [], unsyntax : [] };
 		let checkKeys;
 		let paramsCompiles = Object.assign({}, this.paramsCompiles, this.MainObject.sessionData);
+		for (let groupId in this.groupsConnected) {
+			paramsCompiles = Object.assign({}, paramsCompiles, this.groupsConnected[groupId].sessionData);
+		}
 		
 		for (let param in paramsCompiles) {
 			checkKeys = new Array();
@@ -224,19 +227,24 @@ class Method {
 		}
 		// Исполнение сессии
 		let sessionData = new Session();
+		let groupData = new Session();
 		this.MainObject.session(params, sessionData);
 		sessionData = sessionData._getValues();
-		for (let key in sessionData) { params[key] = sessionData[key]; }
+		
+		for (let groupId in this.groupsConnected) {
+			this.groupsConnected[groupId].handler(params, groupData);
+		}
+		// for (let key in sessionData) { params[key] = sessionData[key]; }
 		// Исполнение группы
 		
-		return this.execute(params);
+		return this.execute(params, sessionData, groupData._getValues());
 	}
 	
-	group (groupClass) {
-		this.groupsConnected.push(groupClass);
+	group (group) {
+		this.groupsConnected.push(group);
 	}
 	
-	execute (params) {}
+	execute (params, sessionData, groupData) {}
 }
 
 

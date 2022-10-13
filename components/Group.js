@@ -1,7 +1,9 @@
 class Group {
-	constructor () {
-		
+	constructor (sessionData) {
+		this.sessionData = sessionData
 	}
+	
+	handler (params, session) { return 1; }
 }
 
 
