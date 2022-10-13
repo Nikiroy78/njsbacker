@@ -4,5 +4,29 @@
     "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0"
-  }
+  },
+  "name": "njsbacker",
+  "version": "0.9.0",
+  "description": "Module for easy developing back-end projects at express.js",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nikiroy78/njsbacker.git"
+  },
+  "keywords": [
+    "backend",
+    "back-end",
+    "express",
+    "express.js"
+  ],
+  "author": "Nikiroy78",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nikiroy78/njsbacker/issues"
+  },
+  "homepage": "https://github.com/Nikiroy78/njsbacker#readme"
 }

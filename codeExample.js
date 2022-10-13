@@ -50,8 +50,7 @@ server.setSessionParams(  // Зададим необходимые параме�
 	{
 		session_id : {
 			required : true,
-			type : backend.types.integer,
-			values : [1]
+			type : backend.types.integer
 		}
 	}
 );
@@ -94,7 +93,20 @@ class SumMethod extends backend.Method {
 	}
 }
 
+class FileMethod extends backend.Method {
+	execute (params, session, groups) {
+		return JSON.stringify(params.file);
+	}
+}
+
 // Создаём экземпляры классов
+var fileMethod = new FileMethod('file', '/file', {
+	file : {
+		required : true,
+		type : backend.types.file()
+	}
+});
+
 var sumMethod = new SumMethod('sum', '/sum', {
 	a : {
 		required : true,
@@ -136,6 +148,7 @@ sumMethod.group(new ExampleMethodGroup({
 // Привяжем метод к основному проекту
 server.method(exampleMethod);
 server.method(sumMethod);
+server.method(fileMethod);
 
 // Запускаем сервер
 server.server('/api/v1').listen(8080, async (err) => {

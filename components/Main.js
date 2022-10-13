@@ -12,6 +12,9 @@ class ApiError extends Error {
 }
 
 
+const debug = (text) => {}
+
+
 class Main {
 	constructor (sendHeaders = true) {
 		this.sendHeaders = sendHeaders;
@@ -79,15 +82,19 @@ class Main {
 		this.fileUploadConfig = fileUploadConfig;
 	}
 
-	router (returnMiddlewareFunction = false, middlewareFunction = (req, res, next) => next(), debug = (text) => console.log(text)) {
+	router (returnMiddlewareFunction = false, middlewareFunction = (req, res, next) => next()) {
 		let router = express.Router();
 		router.use(require('cookie-parser')());
 		// parse various different custom JSON types as JSON
 		router.use(bodyParser.json({ type: 'application/*+json' }))
+		router.use(bodyParser.json({ type: 'application/json' }))
 		// parse some custom thing into a Buffer
 		router.use(bodyParser.raw({ type: 'application/vnd.custom-type' }))
 		// parse an HTML body into a string
 		router.use(bodyParser.text({ type: 'text/html' }));
+		// parse application/x-www-form-urlencoded
+		router.use(bodyParser.urlencoded({ type: 'application/x-www-form-urlencoded', extended: false }))
+		
 		// parse files 
 		router.use(require('express-fileupload')(this.fileUploadConfig));
 		

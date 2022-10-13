@@ -132,14 +132,14 @@ class Method {
 						case 'headers' :
 							[isSyntax, convertedValue] = paramScheme.type.syntax(headers[param], true);
 							break;
+						case 'body' :
+							[isSyntax, convertedValue] = paramScheme.type.syntax(body[param], true);
+							break;
 						case 'json' :
 							[isSyntax, convertedValue] = paramScheme.type.syntax(json[param], paramScheme.conversion);
 							break;
 						case 'params' :
 							[isSyntax, convertedValue] = paramScheme.type.syntax(params[param], paramScheme.conversion);
-							break;
-						case 'body' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(body[param], paramScheme.conversion);
 							break;
 						case 'files' :
 							[isSyntax, convertedValue] = paramScheme.type.syntax(files[param], paramScheme.conversion);
