@@ -49,7 +49,7 @@ var server = new Main(
 server.setSessionParams(  // Зададим необходимые параметры для сессии
 	{
 		session_id : {
-			required : true,
+			required : false,
 			type : backend.types.integer
 		}
 	}
@@ -67,6 +67,16 @@ class ExampleMethodGroup extends backend.Group {
 	}
 }
 // Создаём классы методов
+class ExampleAnyMethodsOfHandlingInformation extends backend.Method {
+	execute (params, session, groups) {
+		return {
+			json_data : params.json_name,
+			query_data : params.query_name,
+		}
+	}
+}
+
+
 class ExampleMethod extends backend.Method {
 	/*
 	var result = this.MainObject.call(method : string, params : object)  // Вызов подключённого метода
@@ -100,6 +110,22 @@ class FileMethod extends backend.Method {
 }
 
 // Создаём экземпляры классов
+var eamohi = new ExampleAnyMethodsOfHandlingInformation('handler', '/handler', {
+	queryName : {
+		required : true,
+		type : backend.types.string,
+		import_key : 'name',
+		allow_params : ['query']
+	},
+	jsonName : {
+		required : true,
+		type : backend.types.string,
+		import_key : 'name',
+		allow_methods : ['post'],
+		allow_params : ['json']
+	}
+});
+
 var fileMethod = new FileMethod('file', '/file', {
 	file : {
 		required : true,
@@ -149,6 +175,7 @@ sumMethod.group(new ExampleMethodGroup({
 server.method(exampleMethod);
 server.method(sumMethod);
 server.method(fileMethod);
+server.method(eamohi);
 
 // Запускаем сервер
 server.server('/api/v1').listen(8080, async (err) => {

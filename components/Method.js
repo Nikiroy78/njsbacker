@@ -92,6 +92,8 @@ class Method {
 			checkKeys = new Array();
 			paramScheme = {
 				required      : false,
+				import_key    : param,
+				save_key      : param,
 				type          : this.isDynamic ? typesApi.dynamic : typesApi.unknown,
 				allow_methods : ['get', 'post', 'put', 'delete'],
 				conversion    : false,
@@ -100,21 +102,21 @@ class Method {
 			// Configure paramScheme
 			for (let key in paramsCompiles[param]) { paramScheme[key] = paramsCompiles[param][key]; }
 			// check missible
-			if (headers[param] != undefined & paramScheme.allow_params.indexOf('headers') != -1) { checkKeys.push('headers'); }
-			if (json[param] != undefined & paramScheme.allow_params.indexOf('json') != -1) { checkKeys.push('json'); }
-			if (query[param] != undefined & paramScheme.allow_params.indexOf('query') != -1) { checkKeys.push('query'); }
-			if (body[param] != undefined & paramScheme.allow_params.indexOf('body') != -1) { checkKeys.push('body'); }
-			if (files[param] != undefined & paramScheme.allow_params.indexOf('files') != -1) { checkKeys.push('files'); }
-			if (cookies[param] != undefined & paramScheme.allow_params.indexOf('cookies') != -1) { checkKeys.push('cookies'); }
-			if (params[param] != undefined & paramScheme.allow_params.indexOf('params') != -1) { checkKeys.push('params'); }
+			if (headers[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('headers') != -1) { checkKeys.push('headers'); }
+			if (json[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('json') != -1) { checkKeys.push('json'); }
+			if (query[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('query') != -1) { checkKeys.push('query'); }
+			if (body[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('body') != -1) { checkKeys.push('body'); }
+			if (files[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('files') != -1) { checkKeys.push('files'); }
+			if (cookies[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('cookies') != -1) { checkKeys.push('cookies'); }
+			if (params[paramScheme.import_key] != undefined & paramScheme.allow_params.indexOf('params') != -1) { checkKeys.push('params'); }
 			
 			if (checkKeys.length == 0) {
-				if (paramScheme.required) { required.missed.push(param); }
-				else { additional.missed.push(param); }
+				if (paramScheme.required) { required.missed.push(paramScheme.import_key); }
+				else { additional.missed.push(paramScheme.import_key); }
 			}
 			else if (paramScheme.allow_methods.indexOf(currentMethod) == -1) {
-				if (paramScheme.required) { required.unsyntax.push({param : param, description : formatMessage(this.error.httpMethodError, 'httpMethodError', paramScheme, currentMethod, param) }); }
-				else { additional.unsyntax.push({param : param, description : formatMessage(this.error.httpMethodError, 'httpMethodError', paramScheme, currentMethod, param)}); }
+				if (paramScheme.required) { required.unsyntax.push({param : paramScheme.import_key, description : formatMessage(this.error.httpMethodError, 'httpMethodError', paramScheme, currentMethod, paramScheme.import_key) }); }
+				else { additional.unsyntax.push({param : paramScheme.import_key, description : formatMessage(this.error.httpMethodError, 'httpMethodError', paramScheme, currentMethod, paramScheme.import_key)}); }
 			}
 			else {
 				checkKeys = checkKeys.sort((a, b) => Number(b == 'query' || b == 'cookies') - Number(a == 'query' || a == 'cookies'));
@@ -124,25 +126,25 @@ class Method {
 				for (let key in checkKeys) {
 					switch (checkKeys[key]) {
 						case 'query' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(query[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(query[paramScheme.import_key], true);
 							break;
 						case 'cookies' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(cookies[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(cookies[paramScheme.import_key], true);
 							break;
 						case 'headers' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(headers[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(headers[paramScheme.import_key], true);
 							break;
 						case 'body' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(body[param], true);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(body[paramScheme.import_key], true);
 							break;
 						case 'json' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(json[param], paramScheme.conversion);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(json[paramScheme.import_key], paramScheme.conversion);
 							break;
 						case 'params' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(params[param], paramScheme.conversion);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(params[paramScheme.import_key], paramScheme.conversion);
 							break;
 						case 'files' :
-							[isSyntax, convertedValue] = paramScheme.type.syntax(files[param], paramScheme.conversion);
+							[isSyntax, convertedValue] = paramScheme.type.syntax(files[paramScheme.import_key], paramScheme.conversion);
 							break;
 					}
 					if (isSyntax) {
@@ -151,11 +153,11 @@ class Method {
 					}
 				}
 				if (isSyntax) {
-					paramsEndless[param] = convertedValue;
+					paramsEndless[paramScheme.save_key] = convertedValue;
 				}
 				else {
-					if (paramScheme.required) { required.unsyntax.push({param : param, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, convertedValue, param) }); }
-					else { additional.unsyntax.push({param : param, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, convertedValue, param)}); }
+					if (paramScheme.required) { required.unsyntax.push({param : paramScheme.import_key, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, convertedValue, paramScheme.import_key) }); }
+					else { additional.unsyntax.push({param : paramScheme.import_key, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, convertedValue, paramScheme.import_key)}); }
 				}
 			}
 		}
@@ -180,42 +182,45 @@ class Method {
 				paramScheme = {
 					required      : false,
 					type          : this.isDynamic ? typesApi.dynamic : typesApi.unknown,
+					import_key    : param,
+					save_key      : param,
 					allow_methods : ['get', 'post', 'put', 'delete'],
 					conversion    : false,
 					allow_params  : ['headers', 'json', 'params', 'query', 'body', 'files', 'cookies']
 				};
 				for (let key in paramsCompiles[param]) { paramScheme[key] = paramsCompiles[param][key]; }
-				if (params[param] === undefined) {
+				
+				if (params[paramScheme.import_key] === undefined) {
 					if (paramScheme.required) {
-						required.missed.push(param);
+						required.missed.push(paramScheme.import_key);
 					}
 					else {
-						additional.missed.push(param);
+						additional.missed.push(paramScheme.import_key);
 					}
 				}
 				else {
 					let selectedSyntaxError = 'typeError';
-					[isSyntax, value] = paramScheme.type.syntax(params[param], paramScheme.conversion);
+					[isSyntax, value] = paramScheme.type.syntax(params[paramScheme.import_key], paramScheme.conversion);
 					if (!isSyntax) {
 						if (paramScheme.required) {
-							required.unsyntax.push({param : param, description : this.error.typeError.split('{param}').join(param).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
+							required.unsyntax.push({param : paramScheme.import_key, description : this.error.typeError.split('{param}').join(paramScheme.import_key).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
 						}
 						else {
-							additional.unsyntax.push({param : param, description : this.error.typeError.split('{param}').join(param).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
+							additional.unsyntax.push({param : paramScheme.import_key, description : this.error.typeError.split('{param}').join(paramScheme.import_key).split('{long_type}').join(paramScheme.type.long_name).split('{short_type}').join(paramScheme.type.short_name)});
 						}
 					}
 					else {
 						[isSyntax, selectedSyntaxError] = paramScheme.type.checkSchema(value, paramScheme);
 						if (!isSyntax) {
 							if (paramScheme.required) {
-								required.unsyntax.push({param : param, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, value, param)});
+								required.unsyntax.push({param : paramScheme.import_key, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, value, paramScheme.import_key)});
 							}
 							else {
-								additional.unsyntax.push({param : param, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, value, param)});
+								additional.unsyntax.push({param : paramScheme.import_key, description : formatMessage(this.error[selectedSyntaxError], selectedSyntaxError, paramScheme, value, paramScheme.import_key)});
 							}
 						}
 						else {
-							params[param] = value;
+							params[paramScheme.save_key] = value;
 						}
 					}
 				}
