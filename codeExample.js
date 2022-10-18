@@ -2,14 +2,6 @@ const backend = require('./index');
 
 // Создаём класс бэкенда, наследующий класс backend.Main
 class Main extends backend.Main {
-	session (params, sessionData) {	  // Настраиваем сессию (опционально)
-		sessionData._setValue('example', 1);  // Задать значение
-		console.log(sessionData.example);     // Получить значение из сессии
-		sessionData._remove('example');       // Убрать значение
-		return 1;                             // Успешно
-		throw 'Example error';                // Пример ошибки
-	};
-	
 	/* errorHandler (error) { return {
 		mainbody : JSON.stringify({ error : {}, error }),
 		headers  : {

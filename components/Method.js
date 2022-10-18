@@ -2,6 +2,9 @@ const typesApi = require('./types');
 const Session = require('./Session');
 
 
+var errHandlers = new Object();
+
+
 const formatMessage = (message, errorType, scheme, value, param) => {
 	value = String(value);
 	switch (errorType) {
@@ -15,6 +18,8 @@ const formatMessage = (message, errorType, scheme, value, param) => {
 			return message.split('{value}').join(scheme.max_length);
 		case 'httpMethodError' :
 			return message.split('{method}').join(value).split('{methods}').join(scheme.allow_methods.join(', '));
+		default :
+			return errHandlers[errorType](message, errorType, scheme, value, param);
 	}
 };
 
@@ -57,6 +62,13 @@ class Method {
 					this.allowedMethods.push(allowedMethods[allowMethod]);
 				}
 			}
+		}
+	}
+	
+	setError (errorCode, message, handler=null) {
+		this.error[errorCode] = message;
+		if (!!handler) {
+			errHandlers[errorCode] = handler;
 		}
 	}
 	
