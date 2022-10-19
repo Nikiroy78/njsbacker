@@ -21,6 +21,53 @@ const types = {
 			throw new Error('Undefined datatype');
 		}
 	},
+	float : {
+		long_name   : 'float',
+		short_name  : 'float',
+		checkSchema : (value, schema) => {
+			if (schema.values != undefined) {  // values
+				if (schema.values.indexOf(value) == -1) {
+					return [false, 'valuesError'];
+				}
+			}
+			
+			if (schema.min_length != undefined) {  // min_length
+				if (value < schema.min_length) {
+					return [false, 'minLengthError'];
+				}
+			}
+			
+			if (schema.max_length != undefined) {  // max_length
+				if (value > schema.max_length) {
+					return [false, 'maxLengthError'];
+				}
+			}
+			
+			return [true, 'ok'];
+		},
+		syntax : (value, needs_convert = true) => {
+			function isFloat (value) {
+				if (String(parseFloat(value)) == 'NaN') return false;
+				return String(parseFloat(value)) == String(Number(value));
+			}
+			
+			if (typeof(value) == 'number' & isFloat(value)) {
+				return [true, value];
+			}
+			else if (needs_convert & isFloat(value)) {
+				return [true, parseFloat(value)];
+			}
+			else {
+				return [false, undefined];
+			}
+		}
+	},
+	array : (splitter, type=types.dynamic) => ({
+		long_name   : `array (${type.long_name})`,
+		short_name  : `arr (${type.short_name})`,
+		checkSchema : (value, schema) => {},
+		syntax : (value, needs_convert = false) => {}
+	}),
 	integer : {
 		long_name   : 'integer',
 		short_name  : 'int',
