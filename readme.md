@@ -84,6 +84,13 @@ class App extends njsbacker.Main {
 }
 ```
 #### errorHadler
-Hadling and format errors.
+Hadling and format errors. First argument is error object when may be hadled by this method. Returns handled error schema when must be containts next params:
+```typescript
+mainbody     : < buffer / object / string >  // content when will be returns
+headers      : object                        // headers into http-response
+cookies      : object                        // cookies when will be applyed
+code         : number                        // http-code
+redirect_uri : string                        // redirect url (non-required, undefined if not redirect)
+```
 ## Additional clases and objects
 ## Examples
