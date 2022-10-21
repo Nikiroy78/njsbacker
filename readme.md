@@ -81,9 +81,31 @@ class App extends njsbacker.Main {
 			code: codeStatus
 		}
 	}
+	
+	responseHandler (response) { return ({  // Handling responses at backend application
+		mainbody : { response },
+		headers : {
+			errored: 0	
+		},
+		cookies : {},
+		// redirect_uri: '';  // if want redirect to another url
+		code: 200
+	}) };
+	
+	session (params, sessionData) {           // Session function
+		sessionData._setValue('example', 1);  // Set value of sessionData object
+		console.log(sessionData.example);     // Get value from sessionData object
+		sessionData._remove('example');       // Remove value
+		return;                               // Successful
+		throw 'Example error';                // Example of error
+	}
+	
+	paramsError (required, additional) {  // Handling missed/unsyntax params
+		return new njsbacker.ApiError('UNSYNTAX_OR_MISSED_REQUIRED_PARAMS', { required, additional });
+	}
 }
 ```
-#### errorHadler
+#### Method: errorHadler
 Hadling and format errors. First argument is error object when may be hadled by this method. Returns handled error schema when must be containts next params:
 ```typescript
 mainbody     : < buffer / object / string >  // content when will be returns
@@ -92,5 +114,27 @@ cookies      : object                        // cookies when will be applyed
 code         : number                        // http-code
 redirect_uri : string                        // redirect url (non-required, undefined if not redirect)
 ```
+#### Method: responseHandler
+Handling responses at backend application. First argument is reponse from .execute method at **Method** object. Must be containts next params:
+```typescript
+mainbody     : < buffer / object / string >  // content when will be returns
+headers      : object                        // headers into http-response
+cookies      : object                        // cookies when will be applyed
+code         : number                        // http-code
+redirect_uri : string                        // redirect url (non-required, undefined if not redirect)
+```
+#### Method: session
+Method that call before executing method or groups of method. First argument - params from http/call method, second argument - **Session** object. This method setting **Session** object params and return error at http-response if error throws.
+#### Method: paramsError
+Method that return error when missing or unsyntax params.
+#### Create object of njsbacker.Main and configuration
+Before work you must create object of njsbacker.Main:
+```javascript
+var app = new App(
+    false  // Returns information about njsbacker in headers.
+);
+```
+### Method
+
 ## Additional clases and objects
 ## Examples
