@@ -134,7 +134,229 @@ var app = new App(
     false  // Returns information about njsbacker in headers.
 );
 ```
+If you're planning use session you can configure him:
+```javascript
+app.setSessionParams(
+	{
+		example_session_param : {
+			required : false,
+			type : njsbacker.types.string
+		}
+	}
+);
+```
+**First param** - information about inputed params [(Params inforamtion)](#params-information)
 ### Method
-
+After you create **njsbacker.Main** object you must create class that extends from **njsbacker.Method**:
+```javascript
+class ExampleMethod extends njsbacker.Method {
+	// Params handler
+	execute (params, session, groups) {
+	    // Any code...
+		return anotherResult;
+		// If you needs raising error:
+		throw new njsbacker.ApiError(
+		    'EXAMPLE_ERROR',  // Error code
+		    new Object()      // Error details
+		);
+	}
+}
+```
+#### Method: execute
+Method of executing current method. Return data when will be sended to njsbacker.Main.responseHandler method.
+#### Connection and configure njsbacker.Method
+After creating class you must create object of njsbacker.Method:
+```javascript
+var exampleMethod = new ExampleMethod('example', '/example', {
+	text : {
+		required : true,
+		type : backend.types.string,
+		min_length : 1,
+		max_length : 255
+	}
+});
+```
+**First param** - name of method into system.  
+**Second param** - path to method into http-server  
+**Third param** - information about inputed params [(Params inforamtion)](#params-information)
+If you create object of **njsbacker.Group** you can pin it with use next method:
+```javascript
+exampleMethod.group(groupObject);
+```
+And that this method work you must pin this method to object of **njsbacker.Main** with use next method:
+```javascript
+app.method(exampleMethod);
+```
+#### Additional tool into njsbacker.Method: this.MainObject.call
 ## Additional clases and objects
-## Examples
+### Params Information
+Before reading this part we tolds about inputed params into http.
+## Example code
+```javascript
+const njsbacker = require('./index');
+
+// Create backend mainclass then extends from njsbacker.Main:
+class Main extends njsbacker.Main {
+	session (params, sessionData) {
+		sessionData._setValue('example', 1);  // Set value
+		console.log(sessionData.example);     // Get value from session
+		sessionData._remove('example');       // Remove value
+		return 1;                             // Successful
+		throw 'Example error'                 // Example of error
+	}
+	
+	responseHandler (response) { return ({
+		mainbody : { response },
+		headers : {
+			errored: 0	
+		},
+		cookies : {},
+		// redirect_uri: '';  // if want redirect to another url
+		code: 200
+	}) };
+	
+	/* paramsError (required, additional) { return({ required, additional }) }; */
+}
+// Create object of Main class.
+var server = new Main(
+	false  // Show information about this library into headers.
+);
+server.setSessionParams(  // Set required params for session.
+	{
+		session_id : {
+			required : false,
+			type : njsbacker.types.integer
+		}
+	}
+);
+
+// Create class from method's group.
+class ExampleMethodGroup extends njsbacker.Group {
+	handler (params, session) {	              // Path handling
+		session._setValue('example', 1);      // Set value
+		console.log(session.example);         // Get value from session
+		session._remove('example');           // Remove value
+		return 1;                             // Successful
+		throw 'Example error'                 // Example of error
+	}
+}
+// Create classes of method
+class ExampleAnyMethodsOfHandlingInformation extends njsbacker.Method {
+	execute (params, session, groups) {
+		return {
+			json_data : params.json_name,
+			query_data : params.query_name,
+		}
+	}
+}
+
+
+class ExampleMethod extends njsbacker.Method {
+	/*
+	var result = this.MainObject.call(method : string, params : object)  // Вызов подключённого метода
+	*/
+	
+	// Params handler
+	execute (params, session, groups) {
+		return {
+			text   : params.text,
+			result : this.MainObject.call('sum', {
+				a  : 15,
+				b  : 17,
+				session_id : params.session_id
+			})
+		};
+		throw new njsbacker.ApiError('EXAMPLE_ERROR', new Object());
+	}
+}
+
+
+class SumMethod extends njsbacker.Method {
+	execute (params, session, groups) {
+		return params.a + params.b;
+	}
+}
+
+class FileMethod extends njsbacker.Method {
+	execute (params, session, groups) {
+		return JSON.stringify(params.file);
+	}
+}
+
+// Create class objects
+var eamohi = new ExampleAnyMethodsOfHandlingInformation('handler', '/handler', {
+	queryName : {
+		required : true,
+		type : njsbacker.types.string,
+		import_key : 'name',
+		allow_params : ['query']
+	},
+	jsonName : {
+		required : true,
+		type : njsbacker.types.string,
+		import_key : 'name',
+		allow_methods : ['post'],
+		allow_params : ['json']
+	}
+});
+
+var fileMethod = new FileMethod('file', '/file', {
+	file : {
+		required : true,
+		type : njsbacker.types.file()
+	}
+});
+
+var sumMethod = new SumMethod('sum', '/sum', {
+	a : {
+		required : true,
+		type : njsbacker.types.integer,
+		conversion : false,
+		// allow_methods : ['post'],
+	},
+	b : {
+		required : true,
+		type : njsbacker.types.integer,
+		conversion : false,
+		// allow_methods : ['post'],
+	}
+});
+
+var exampleMethod = new ExampleMethod('example', '/example', {
+	text : {
+		required : true,
+		type : njsbacker.types.string,
+		conversion : false,
+		values : ['123', 'test'],
+		min_length : 1,
+		max_length : 255,
+		// allow_methods : ['post'],
+		// allow_params : ['json'],
+	}
+});
+// Pins methods to group
+exampleMethod.group(new ExampleMethodGroup({
+	ses : {
+		type : njsbacker.types.string
+	}
+}));
+sumMethod.group(new ExampleMethodGroup({
+	ses : {
+		type : njsbacker.types.string
+	}
+}));
+// Pin methods to mein project
+server.method(exampleMethod);
+server.method(sumMethod);
+server.method(fileMethod);
+server.method(eamohi);
+
+// Run server
+server.server('/api/v1').listen(8080, async (err) => {
+	if (err) { throw err; }
+	else {
+		console.log('SERVER RUNNED');
+	}
+});
+```
+You can show example code in file **codeExample.js**

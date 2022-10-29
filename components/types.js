@@ -62,11 +62,62 @@ const types = {
 			}
 		}
 	},
+	bool : (trueValue = '1') => {
+		long_name   : 'boolean',
+		short_name  : 'bool',
+		checkSchema : (value, schema) => {
+			if (schema.min_length != undefined) {  // min_length
+				if (value.length < schema.min_length) {
+					return [false, 'minLengthError'];
+				}
+			}
+			
+			if (schema.max_length != undefined) {  // max_length
+				if (value.length > schema.max_length) {
+					return [false, 'maxLengthError'];
+				}
+			}
+			
+			return [true, 'ok'];
+		},
+		syntax : (value, needs_convert = false) => {
+			if (needs_convert) {
+				return [true, value === trueValue]
+			}
+			else {
+				return [typeof(value) == 'boolean', typeof(value) == 'boolean' ? value : undefined]
+			}
+		}
+	},
 	array : (splitter, type=types.dynamic) => ({
 		long_name   : `array (${type.long_name})`,
 		short_name  : `arr (${type.short_name})`,
-		checkSchema : (value, schema) => {},
-		syntax : (value, needs_convert = false) => {}
+		checkSchema : (value, schema) => {
+			if (schema.min_length != undefined) {  // min_length
+				if (value.length < schema.min_length) {
+					return [false, 'minLengthError'];
+				}
+			}
+			
+			if (schema.max_length != undefined) {  // max_length
+				if (value.length > schema.max_length) {
+					return [false, 'maxLengthError'];
+				}
+			}
+			
+			return [true, 'ok'];
+		},
+		syntax : (value, needs_convert = false) => {
+			if (typeof(value) == 'string' & !!needs_convert) {
+				value = value.split(splitter);
+			}
+			else if (typeof(value) != 'object') {
+				return [false, undefined];
+			}
+			// checking type of array
+			let isSyntax = Object.assign({}, value).filter(item => type.syntax(item, needs_convert)[0]).length == value.length;
+			return [isSyntax, isSyntax ? value : undefined]
+		}
 	}),
 	integer : {
 		long_name   : 'integer',

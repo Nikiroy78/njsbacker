@@ -1,7 +1,7 @@
-const backend = require('./index');
+const njsbacker = require('./index');
 
-// Создаём класс бэкенда, наследующий класс backend.Main
-class Main extends backend.Main {
+// Создаём класс бэкенда, наследующий класс njsbacker.Main
+class Main extends njsbacker.Main {
 	/* errorHandler (error) { return {
 		mainbody : JSON.stringify({ error : {}, error }),
 		headers  : {
@@ -19,7 +19,7 @@ class Main extends backend.Main {
 		console.log(sessionData.example);     // Получить значение из сессии
 		sessionData._remove('example');       // Убрать значение
 		return 1;                             // Успешно
-		return 'Example error'                // Пример ошибки
+		throw 'Example error'                 // Пример ошибки
 	}
 	
 	responseHandler (response) { return ({
@@ -42,14 +42,13 @@ server.setSessionParams(  // Зададим необходимые параме�
 	{
 		session_id : {
 			required : false,
-			type : backend.types.integer
+			type : njsbacker.types.integer
 		}
 	}
 );
-server.typeError = 'param {param} must be only {long_type} ({short_type})';
 
 // Создаём класс группы методов
-class ExampleMethodGroup extends backend.Group {
+class ExampleMethodGroup extends njsbacker.Group {
 	handler (params, session) {	              // Путевая обработка
 		session._setValue('example', 1);      // Задать значение
 		console.log(session.example);         // Получить значение из сессии
@@ -59,7 +58,7 @@ class ExampleMethodGroup extends backend.Group {
 	}
 }
 // Создаём классы методов
-class ExampleAnyMethodsOfHandlingInformation extends backend.Method {
+class ExampleAnyMethodsOfHandlingInformation extends njsbacker.Method {
 	execute (params, session, groups) {
 		return {
 			json_data : params.json_name,
@@ -69,7 +68,7 @@ class ExampleAnyMethodsOfHandlingInformation extends backend.Method {
 }
 
 
-class ExampleMethod extends backend.Method {
+class ExampleMethod extends njsbacker.Method {
 	/*
 	var result = this.MainObject.call(method : string, params : object)  // Вызов подключённого метода
 	*/
@@ -84,18 +83,18 @@ class ExampleMethod extends backend.Method {
 				session_id : params.session_id
 			})
 		};
-		throw new backend.ApiError('EXAMPLE_ERROR', new Object());
+		throw new njsbacker.ApiError('EXAMPLE_ERROR', new Object());
 	}
 }
 
 
-class SumMethod extends backend.Method {
+class SumMethod extends njsbacker.Method {
 	execute (params, session, groups) {
 		return params.a + params.b;
 	}
 }
 
-class FileMethod extends backend.Method {
+class FileMethod extends njsbacker.Method {
 	execute (params, session, groups) {
 		return JSON.stringify(params.file);
 	}
@@ -105,13 +104,13 @@ class FileMethod extends backend.Method {
 var eamohi = new ExampleAnyMethodsOfHandlingInformation('handler', '/handler', {
 	queryName : {
 		required : true,
-		type : backend.types.string,
+		type : njsbacker.types.string,
 		import_key : 'name',
 		allow_params : ['query']
 	},
 	jsonName : {
 		required : true,
-		type : backend.types.string,
+		type : njsbacker.types.string,
 		import_key : 'name',
 		allow_methods : ['post'],
 		allow_params : ['json']
@@ -121,20 +120,20 @@ var eamohi = new ExampleAnyMethodsOfHandlingInformation('handler', '/handler', {
 var fileMethod = new FileMethod('file', '/file', {
 	file : {
 		required : true,
-		type : backend.types.file()
+		type : njsbacker.types.file()
 	}
 });
 
 var sumMethod = new SumMethod('sum', '/sum', {
 	a : {
 		required : true,
-		type : backend.types.integer,
+		type : njsbacker.types.integer,
 		conversion : false,
 		// allow_methods : ['post'],
 	},
 	b : {
 		required : true,
-		type : backend.types.integer,
+		type : njsbacker.types.integer,
 		conversion : false,
 		// allow_methods : ['post'],
 	}
@@ -143,7 +142,7 @@ var sumMethod = new SumMethod('sum', '/sum', {
 var exampleMethod = new ExampleMethod('example', '/example', {
 	text : {
 		required : true,
-		type : backend.types.string,
+		type : njsbacker.types.string,
 		conversion : false,
 		values : ['123', 'test'],
 		min_length : 1,
@@ -155,12 +154,12 @@ var exampleMethod = new ExampleMethod('example', '/example', {
 // Привяжем метод к группе
 exampleMethod.group(new ExampleMethodGroup({
 	ses : {
-		type : backend.types.string
+		type : njsbacker.types.string
 	}
 }));
 sumMethod.group(new ExampleMethodGroup({
 	ses : {
-		type : backend.types.string
+		type : njsbacker.types.string
 	}
 }));
 // Привяжем метод к основному проекту
