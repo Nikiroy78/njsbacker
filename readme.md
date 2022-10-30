@@ -18,7 +18,7 @@ mainserverObject.server(
 });
 ```
 Below you can see how responses from http/call-function hadless into reponse at scheme:
-![simple scheme of njsbacker handling data an executing](https://sun9-78.userapi.com/impg/etOt-TcZ1KVxUnIm3laKJgAveXaMEOGfbGY0Wg/dIekdeOOKeo.jpg?size=649x353&quality=96&sign=958f40b23ab188ea03612bc98def05fe&type=album)
+![simple scheme of njsbacker handling data an executing](https://sun9-78.userapi.com/impg/etOt-TcZ1KVxUnIm3laKJgAveXaMEOGfbGY0Wg/dIekdeOOKeo.jpg?size=649x353&quality=96&sign=958f40b23ab188ea03612bc98def05fe&type=album)  
 Http data or Data from call method gets into pre_execution binary function where checks data: syntax/missed or no: if all successfuly data get into Session/Group/Method execute method else throwing error.
 ### Before work.
 Before work you must install this package:
@@ -170,7 +170,7 @@ After creating class you must create object of njsbacker.Method:
 var exampleMethod = new ExampleMethod('example', '/example', {
 	text : {
 		required : true,
-		type : backend.types.string,
+		type : njsbacker.types.string,
 		min_length : 1,
 		max_length : 255
 	}
