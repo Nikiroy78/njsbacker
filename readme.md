@@ -188,9 +188,88 @@ And that this method work you must pin this method to object of **njsbacker.Main
 app.method(exampleMethod);
 ```
 #### Additional tool into njsbacker.Method: this.MainObject.call
+Inside execute method you can refer to existing methods into API.  
+**Annotation**: this.MainObject is object of **njsbacker.Main** there was been included to **njsbacker.Method**
+```javascript
+class ExampleMethod extends njsbacker.Method {
+    execute (params, session, groups) {
+        // Another code here...
+        this.MainObject.call('SecondExampleMethodName', {
+            param : "value"
+        });
+        // Another code here...
+        return result;
+    }
+}
+```
+**First param** - name of method.  
+**Second param** - params there sends into method.  
 ## Additional clases and objects
 ### Params Information
-Before reading this part we tolds about inputed params into http.
+Before reading this part we tolds about inputed params into http.  
+**Example:**
+```javascript
+var paramsInfo = {
+    paramNameCookie : {
+        required     : true,
+        type         : njsbacker.types.string,
+        import_key   : 'param',
+        allow_params : ['cookies']
+    },
+    paramNameQuery : {
+        type         : njsbacker.types.string,
+        import_key   : 'param',
+        allow_params : ['query']
+    }
+}
+
+var exampleMethod = new ExampleMethod('example', '/example', paramsInfo);
+```
+**Objects keys and default values**:
+```typescript
+required      : boolean = false                                                              // Required param or no.
+import_key    : string  = param                                                              // Key when using as param int http headers/string (etc.)
+save_key      : string  = param                                                              // Key when will be saved at param object 
+type          : object  = njsbacker.types.unknown                                            // Param's datatype
+allow_methods : array   = ['get', 'post', 'put', 'delete']                                   // Methods when method will be listen.
+conversion    : boolean = false                                                              // Covert datatype if inputed datatype not equal "type" param.
+allow_params  : array   = ['headers', 'json', 'params', 'query', 'body', 'files', 'cookies'] // Http-params where will be reads into method.
+```
+### Group
+This is njbacker object where executing before **njsbacker.Method** if was been pinned to **njsbacker.Method**.  
+Before work you must create class when extends from **njsbacker.Method** and create into class method **handler**:
+```javascript
+class ExampleGroup extends njsbacker.Method {
+    handler (params, session) {	              // Path handling
+		session._setValue('example', 1);      // Set value
+		console.log(session.example);         // Get value from session
+		session._remove('example');           // Remove value
+		return 1;                             // Successful
+		throw 'Example error'                 // Error example
+	}
+}
+```
+### types
+**dynamic** - Dynamic datatype  
+**unknown** - Unknown datatype *(Raising error)*  
+**float** - Float *(real)* datatype  
+**array** *(function)* - array of data.  
+```javascript
+// Example of array
+var datatype = njsbacker.types.array(
+    splitSymbol,  // symbol where will be used for splits queries, cookies and other string params. (required)
+    typeOfArray,  // type of array data.                                                            (default: dynamic)
+);
+```
+**integer** - Integer datatype.  
+**file** *(function)* - file object [read more in express-fileupload module](https://www.npmjs.com/package/express-fileupload)  
+```javascript
+// Example of file
+var datatype = njsbacker.types.file(
+    allowedExtensions,  // allowed extensions (default: null (all extensions allowed))
+);
+```
+**string** - String datatype.  
 ## Example code
 ```javascript
 const njsbacker = require('./index');
