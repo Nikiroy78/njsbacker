@@ -6,7 +6,7 @@
     "express-fileupload": "^1.4.0"
   },
   "name": "njsbacker",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Module for easy developing back-end projects at express.js",
   "main": "index.js",
   "devDependencies": {},

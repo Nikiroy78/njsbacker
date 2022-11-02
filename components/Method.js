@@ -80,7 +80,7 @@ class Method {
 		this.MainObject = mainObject;
 	}
 	
-	executeIntoExpressRouter (
+	async executeIntoExpressRouter (
 		currentMethod,
 		headers,
 		json,
@@ -177,11 +177,11 @@ class Method {
 			throw this.MainObject.paramsError(required, additional);
 		}
 		else {
-			return this.pre_execute(paramsEndless, false);
+			return await this.pre_execute(paramsEndless, false);
 		}
 	}
 	
-	pre_execute (params, needsChecking = true) {
+	async pre_execute (params, needsChecking = true) {
 		if (needsChecking) {
 			let required   = { missed : [], unsyntax : [] };
 			let additional = { missed : [], unsyntax : [] };
@@ -254,7 +254,7 @@ class Method {
 		// for (let key in sessionData) { params[key] = sessionData[key]; }
 		// Исполнение группы
 		
-		return this.execute(params, sessionData, groupData._getValues());
+		return await this.execute(params, sessionData, groupData._getValues());
 	}
 	
 	group (group) {

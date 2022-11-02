@@ -115,7 +115,7 @@ class Main {
 							contentType = 'unknown';
 						}
 						
-						let result = this.methods[name].executeIntoExpressRouter(
+						let result = await this.methods[name].executeIntoExpressRouter(
 							this.methods[name].allowedMethods[methodId],
 							req.headers,
 							(contentType.indexOf('json') != -1) ? req.body : new Object(),
