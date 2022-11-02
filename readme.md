@@ -2,7 +2,7 @@
 Njsbacker is framework for backend developing at node.js/express.js *(in future versions can be supports any frameworks)*
 ## How it works?
 Below you can see simple scheme as framework works: from **session** response get into **Main class** where or getting at **Group** and next into **Method**, or at **Method Class** where response data from http-params, **Group** and **Session** hadling at execution method.
-![simple scheme of njsbacker work](https://sun9-71.userapi.com/impg/VjRpi90eSMsV05NPRU3GVNxwEbem8ITGjErioQ/lyD9S-F_qI4.jpg?size=726x341&quality=96&sign=d48f6eff6f6da9747675287096eb24b3&type=album)
+![simple scheme of njsbacker work](https://sun9-71.userapi.com/impg/VjRpi90eSMsV05NPRU3GVNxwEbem8ITGjErioQ/lyD9S-F_qI4.jpg?size=726x341&quality=96&sign=d48f6eff6f6da9747675287096eb24b3&type=album)  
 After init main logic, logic can be converted at **express.js router** or **express.js server (app)**. Below you can see example code:
 ```javascript
 // ... another code
@@ -18,7 +18,7 @@ mainserverObject.server(
 });
 ```
 Below you can see how responses from http/call-function hadless into reponse at scheme:
-![simple scheme of njsbacker handling data an executing](https://sun9-78.userapi.com/impg/etOt-TcZ1KVxUnIm3laKJgAveXaMEOGfbGY0Wg/dIekdeOOKeo.jpg?size=649x353&quality=96&sign=958f40b23ab188ea03612bc98def05fe&type=album)
+![simple scheme of njsbacker handling data an executing](https://sun9-78.userapi.com/impg/etOt-TcZ1KVxUnIm3laKJgAveXaMEOGfbGY0Wg/dIekdeOOKeo.jpg?size=649x353&quality=96&sign=958f40b23ab188ea03612bc98def05fe&type=album)  
 Http data or Data from call method gets into pre_execution binary function where checks data: syntax/missed or no: if all successfuly data get into Session/Group/Method execute method else throwing error.
 ### Before work.
 Before work you must install this package:
