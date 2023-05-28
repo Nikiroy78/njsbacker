@@ -88,7 +88,7 @@ const types = {
 				return [false, undefined];
 			}
 			// checking type of array
-			let isSyntax = Object.assign({}, value).filter(item => type.syntax(item, needs_convert)[0]).length == value.length;
+			let isSyntax = [].concat(value).filter(item => type.syntax(item, needs_convert)[0]).length == value.length;
 			return [isSyntax, isSyntax ? value : undefined]
 		}
 	}),
